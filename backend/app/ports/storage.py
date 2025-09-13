@@ -1,0 +1,6 @@
+from typing import Protocol, BinaryIO, Optional
+
+
+class StoragePort(Protocol):
+    def put_object(self, key: str, file_bytes: bytes, content_type: str) -> None: ...
+    def get_stream(self, key: str) -> BinaryIO: ...
