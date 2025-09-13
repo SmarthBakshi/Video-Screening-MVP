@@ -1,4 +1,5 @@
 import uuid
+from pathlib import Path
 from datetime import datetime
 from ..domain.models import Video
 from ..domain.errors import InviteNotFound, InviteExpired, InvalidMime, VideoTooLarge
@@ -22,12 +23,27 @@ class VideoService:
             raise InviteNotFound()
         if inv.expires_at < datetime.utcnow():
             raise InviteExpired()
-        if content_type not in self.allowed_mimes:
+
+        # --- MIME/ext normalization (more tolerant) ---
+        mime = (content_type or "").lower()
+        base = mime.split(";", 1)[0].strip()  # e.g. "video/webm" from "video/webm;codecs=vp9"
+        ext = Path(filename).suffix.lower()   # ".webm", ".mp4", ".mov", ".m4v"
+
+        allowed_exts = {".webm", ".mp4", ".mov", ".m4v"}
+        looks_like_video = base.startswith("video/") or ext in allowed_exts
+
+        if not (base in self.allowed_mimes or looks_like_video):
+            # still reject truly unknown types
             raise InvalidMime()
+
+        if not data or len(data) == 0:
+            # guard against empty upload
+            raise VideoTooLarge()  # or HTTP 400 in the route if you prefer
+
         if len(data) > self.max_bytes:
             raise VideoTooLarge()
 
-
+        # --- rest of your existing code ---
         vid = Video(
             id=str(uuid.uuid4()),
             invite_id=inv.id,
@@ -36,12 +52,12 @@ class VideoService:
             created_at=datetime.utcnow(),
             tag=None,
         )
-        self.storage.put_object(vid.storage_key, data, content_type)
+        self.storage.put_object(vid.storage_key, data, base or "application/octet-stream")
+
         inv.status = "UPLOADED"
         self.videos.create(vid)
         self.invites.update(inv)
         return vid
-
 
     def tag_video(self, video_id: str, tag: str) -> Video:
         v = self.videos.get(video_id)
