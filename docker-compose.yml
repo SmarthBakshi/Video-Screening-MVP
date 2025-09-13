@@ -1,0 +1,28 @@
+version: "3.9"
+services:
+  api:
+    build:
+      context: ./backend
+    environment:
+      CORS_ALLOW_ORIGIN: http://localhost:5173
+      STORAGE_BACKEND: localfs
+      DB_BACKEND: inmemory
+      MAX_UPLOAD_MB: 50
+      TOKEN_TTL_MIN: 10080
+    volumes:
+      - ./backend/app:/app/app
+      - ./backend/uploads:/app/uploads
+    ports:
+      - "8000:8000"
+
+  web:
+    build:
+      context: ./frontend
+    environment:
+      VITE_API_BASE: http://localhost:8000/api/v1
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "5173:5173"
+    depends_on:
+      - api
