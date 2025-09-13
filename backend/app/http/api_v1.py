@@ -20,7 +20,7 @@ _inv_svc = InviteService(_inv_repo, token_ttl_min=settings.TOKEN_TTL_MIN)
 _vid_svc = VideoService(
 _inv_repo, _vid_repo, _storage,
 max_mb=settings.MAX_UPLOAD_MB,
-allowed_mimes={"video/webm", "video/mp4"}
+allowed_mimes={"video/webm", "video/mp4", "video/quicktime"}
 )
 
 
@@ -47,15 +47,15 @@ def validate_token(token: str):
 
 
 @router.post("/upload/{token}", response_model=UploadOut)
-def upload_video(token: str, file: UploadFile = File(...)):
+async def upload_video(token: str, file: UploadFile = File(...)):
     try:
-        raw = file.file.read()
+        raw = await file.read()
+        if not raw or len(raw) == 0:
+            raise HTTPException(400, detail="empty upload")
         v = _vid_svc.upload_for_token(token, file.filename, file.content_type or "", raw)
         return {"videoId": v.id}
     except InviteNotFound:
         raise HTTPException(404, detail="invite not found")
-    except InviteExpired:
-        raise HTTPException(410, detail="invite expired")
     except InvalidMime:
         raise HTTPException(415, detail="invalid mime type")
     except VideoTooLarge:
