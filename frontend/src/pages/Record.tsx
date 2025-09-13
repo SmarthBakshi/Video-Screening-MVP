@@ -20,17 +20,18 @@ check()
 
 
 async function upload() {
-if (!blob || !token) return
-setStatus('uploading')
-const form = new FormData()
-form.append('file', blob, 'recording.webm')
-try {
-const res = await apiUpload<{ videoId: string }>(`/upload/${token}`, form)
-setVideoId(res.videoId)
-setStatus('done')
-} catch (e) {
-setStatus('error')
-}
+  if (!blob || !token) return
+  if (blob.size === 0) {
+    alert('Recording failed (empty video). Please re-record and try again.')
+    return
+  }
+  setStatus('uploading')
+  const ext = (blob as any).__fileExt || 'webm'
+  const form = new FormData()
+  form.append('file', blob, `recording.${ext}`)
+  const res = await apiUpload<{ videoId: string }>(`/upload/${token}`, form)
+  setVideoId(res.videoId)
+  setStatus('done')
 }
 
 
