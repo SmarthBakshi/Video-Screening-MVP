@@ -84,8 +84,9 @@ class MongoVideoRepo:
         d = self.col.find_one({"_id": vid})
         return _video_from_doc(d) if d else None
 
-    def list_by_invite(self, invite_id: str) -> List[Video]:
-        return [_video_from_doc(d) for d in self.col.find({"invite_id": invite_id}).sort("created_at", ASCENDING)]
+    def list_by_invite(self, invite_id: str):
+        return [_video_from_doc(d)
+            for d in self.col.find({"invite_id": invite_id}).sort("created_at", 1)]
 
     def update(self, video: Video) -> None:
         self.col.replace_one({"_id": video.id}, _video_to_doc(video), upsert=True)
