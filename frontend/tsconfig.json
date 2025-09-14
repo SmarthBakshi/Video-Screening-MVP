@@ -1,21 +1,17 @@
 {
-"compilerOptions": {
+  "compilerOptions": {
     "target": "ES2020",
-    "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
-    "skipLibCheck": true,
     "jsx": "react-jsx",
     "moduleResolution": "Bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true,
     "strict": true,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "paths": {
-    "@/*": ["./src/*"]
-    }
-},
-"include": ["src"]
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+
+    "baseUrl": "src",
+    "paths": { "@/*": ["./*"] },
+
+    "types": ["vite/client"]    
+  },
+  "include": ["src"]            
 }

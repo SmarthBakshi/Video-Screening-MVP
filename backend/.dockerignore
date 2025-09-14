@@ -1,5 +1,10 @@
-__pycache__
+__pycache__/
 *.pyc
-.venv
-uploads
+*.pyo
+*.pyd
+venv/
+.environment/
+uploads/*
 .env
+.git
+.gitignore
