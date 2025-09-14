@@ -33,19 +33,13 @@ Table of Contents
     
 *   [Run with Docker](#run-with-docker)
     
-*   [Using MongoDB (and accessing it)](#using-mongodb-and-accessing-it)
+*   [Accessing metadata stored in MongoDB](#accessing-metadata-stored-in-mongodb)
     
-*   [Switch DB backends: in-memory ↔ MongoDB](#switch-db-backends-in-memory--mongodb)
-    
-*   [API overview](#api-overview)
-    
-*   [Frontend routes](#frontend-routes)
-    
-*   [Design choices & extensibility](#design-choices--extensibility)
+*   [Switch DB backends](#switch-db-backends)
     
 *   [Future enhancements](#future-enhancements)
     
-    
+*   [App Walkthrough](#app-walkthrough)      
 
 Architecture at a glance
 ------------------------
@@ -159,7 +153,7 @@ Prerequisites
 
 **Local (no Docker):**
 
-*   Python **3.12+** (or your installed Python; project tested with 3.12)
+*   Python **3.12+** 
     
 *   Node.js **v20+** and npm
     
@@ -176,7 +170,7 @@ Configuration (env)
 
 ### Backend (local)
 
-Create your backend/.env using backend/.env.example
+Create your `backend/.env` using `backend/.env.example`
  > Set `DB_BACKEND=mongo` to use MongoDB locally, by default it uses 'inmemory'.
 
 ### Backend (Docker)
@@ -197,14 +191,15 @@ Run locally (no Docker)
     ```bash
     # backend
     cd backend
-    python3 -m venv .environment && . .environment/bin/activate
+    python3 -m venv .environment && source .environment/bin/activate # For Unix/Linux
+    python3 -m venv .environment && .environment\Scripts\activate # For Windows
     pip install -r requirements.txt
     # frontend
     cd ../frontend
     npm install
     ```
     
-2.  **Run api and web**
+2.  **Run api and web (from root)**
     
     ```bash
     make api # API → http://localhost:8000/docs
@@ -228,9 +223,7 @@ Open:
 *   Web (Admin): [**http://localhost:8080/admin**](http://localhost:8080/admin)
     
 *   API docs: [**http://localhost:8000/docs**](http://localhost:8000/docs)
-    
-*   Mongo Express: [**http://localhost:8081**](http://localhost:8081)
-    
+        
 
 **To stop:**
 
@@ -257,7 +250,7 @@ Accessing metadata stored in MongoDB
 
 ### Locally (no Docker)
 
-*   Ensure `MONGO\_URL=mongodb://localhost:27017` and `DB_BACKEND=mongo` in `backend/.env`.
+*   Ensure `MONGO_URL=mongodb://localhost:27017` and `DB_BACKEND=mongo` in `backend/.env`.
     
 *   Use `mongosh`
     ```bash
@@ -265,7 +258,7 @@ Accessing metadata stored in MongoDB
     ```
     
 
-Switch DB backends: in-memory ↔ MongoDB
+Switch DB backends
 ---------------------------------------
 
 *   **In-memory** (default):
@@ -278,107 +271,16 @@ Switch DB backends: in-memory ↔ MongoDB
         
 *   **MongoDB** (persistent):
     
-    *   DB_BACKEND=mongoMONGO\_URL=mongodb://localhost:27017MONGO\_DB=aurio
-        
-    *   Docker: compose already wires DB_BACKEND=mongo and MONGO\_URL=mongodb://mongo:27017.
+    *   Local: run MongoDB locally and set:
+    ```bash
+    DB_BACKEND=mongo
+    MONGO_URL=mongodb://localhost:27017
+    MONGO_DB=aurio
+    ```    
+    *   Docker: compose already wires `DB_BACKEND=mongo` and `MONGO_URL=mongodb://mongo:27017`.
         
 
 Restart the API after changing.
-
-API overview
-------------
-
-Open Swagger: [**http://localhost:8000/docs**](http://localhost:8000/docs)
-
-Key endpoints (all prefixed with /api/v1):
-
-*   POST /invitesCreate an invite. Body: {"email": "candidate@example.com"}→ Returns { id, email, token, status }
-    
-*   GET /invitesList invites.
-    
-*   GET /invites/{token}Validate a candidate token, returns { ok: true, inviteId } if valid.
-    
-*   POST /upload/{token}Upload recorded video (multipart/form-data) as file.
-    
-*   GET /videos?inviteId={inviteId}List videos for an invite.
-    
-*   GET /videos/{videoId}Get single video metadata.
-    
-*   GET /videos/{videoId}/streamStream video content (served from uploads/).
-    
-*   POST /videos/{videoId}/tagBody: {"tag": "review"} → update tag.
-    
-
-Optional debug:
-
-*   GET /\_debug/config → Shows active repo/storage (handy during setup).
-    
-
-Frontend routes
----------------
-
-*   /admin
-    
-    *   Create invites (shows shareable r/:token link)
-        
-    *   See latest video per invite
-        
-    *   **Play / Preview** video & **Tag** it
-        
-*   /r/:token
-    
-    *   Candidate recording page (2-minute cap)
-        
-    *   Uploads to /upload/:token
-        
-*   /v/:id
-    
-    *   Playback page for a single video
-        
-
-Design choices & extensibility
-------------------------------
-
-*   **Clean boundaries** via Ports/Adapters (hexagonal):
-    
-    *   ports/ define **interfaces** (InviteRepo, VideoRepo, Storage)
-        
-    *   adapters/ implement them (InMemory/Mongo repos, LocalFS storage)
-        
-    *   **Swap** infra by changing env/config & DI wiring; no domain changes required
-        
-*   **Storage swap (S3-ready)**:
-    
-    *   Add adapters/storage/s3.py implementing Storage:
-        
-        *   save(key, bytes) → upload to S3
-            
-        *   get\_stream(key) → stream via presigned URL or proxy stream
-            
-    *   Configure via STORAGE\_BACKEND=s3 + AWS\_\* env + bucket name
-        
-    *   Optional: client-side direct uploads with **presigned POST** for large files
-        
-*   **Database swap**:
-    
-    *   Add adapters/repos/dynamo.py implementing repo interfaces
-        
-    *   Keep services/ untouched; only DI wiring and env change
-        
-*   **HTTP/API**:
-    
-    *   FastAPI schemas give clear contracts and Swagger UI for demos
-        
-    *   CORS locked to the FE origin (env override per environment)
-        
-*   **Maintainability**:
-    
-    *   Small, focused modules; readable services; explicit error types
-        
-    *   In-memory adapters make dev/testing trivial
-        
-    *   Mongo adapters add persistence without changing domain logic
-        
 
 Future enhancements
 -------------------
@@ -403,7 +305,7 @@ Future enhancements
 
 
 
-App Demo script 
+App Walkthrough 
 ------------------
 
 1.  Open **Admin**: [http://localhost:5173/admin](http://localhost:5173/admin) (local) or [http://localhost:8080/admin](http://localhost:8080/admin) (Docker)
