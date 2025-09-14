@@ -18,8 +18,6 @@ Built with clean, swappable boundaries so you can later swap **storage** (Local 
 
 Table of Contents
 -----------------
-
-*   [Architecture at a glance](#architecture-at-a-glance)
     
 *   [Tech stack](#tech-stack)
     
@@ -41,27 +39,6 @@ Table of Contents
     
 *   [App Walkthrough](#app-walkthrough)      
 
-Architecture at a glance
-------------------------
-
-**Hexagonal (“ports & adapters”)** design:
-
-*   **Domain & Services** (pure Python): invite & video flows, validation, business rules
-    
-*   **Ports (interfaces)**: InviteRepo, VideoRepo, Storage
-    
-*   **Adapters**:
-    
-    *   Repos: InMemory or Mongo
-        
-    *   Storage: LocalFS (local folder); later: S3
-        
-*   **HTTP API**: FastAPI (/api/v1)
-    
-*   **Frontend**: React + TypeScript (Vite)
-    
-
-This keeps the core flow stable while letting you **swap infrastructure** with minimal code.
 
 Tech stack
 ----------
