@@ -177,7 +177,7 @@ Configuration (env)
 ### Backend (local)
 
 Create your backend/.env using backend/.env.example
- > Set `DB\_BACKEND=mongo` to use MongoDB locally, by default it uses 'inmemory'.
+ > Set `DB_BACKEND=mongo` to use MongoDB locally, by default it uses 'inmemory'.
 
 ### Backend (Docker)
 
@@ -213,7 +213,7 @@ Run locally (no Docker)
         
 3.  **Switch DB backend** 
 
-    Set `DB\_BACKEND=inmemory` (default) or `mongo` in `backend/.env` and restart API.
+    Set `DB_BACKEND=inmemory` (default) or `mongo` in `backend/.env` and restart API.
     
 
 Run with Docker
@@ -257,7 +257,7 @@ Accessing metadata stored in MongoDB
 
 ### Locally (no Docker)
 
-*   Ensure `MONGO\_URL=mongodb://localhost:27017` and `DB\_BACKEND=mongo` in `backend/.env`.
+*   Ensure `MONGO\_URL=mongodb://localhost:27017` and `DB_BACKEND=mongo` in `backend/.env`.
     
 *   Use `mongosh`
     ```bash
@@ -274,13 +274,13 @@ Switch DB backends: in-memory ↔ MongoDB
         
     *   Ephemeral; restart clears data
         
-    *   Set: DB\_BACKEND=inmemory
+    *   Set: DB_BACKEND=inmemory
         
 *   **MongoDB** (persistent):
     
-    *   DB\_BACKEND=mongoMONGO\_URL=mongodb://localhost:27017MONGO\_DB=aurio
+    *   DB_BACKEND=mongoMONGO\_URL=mongodb://localhost:27017MONGO\_DB=aurio
         
-    *   Docker: compose already wires DB\_BACKEND=mongo and MONGO\_URL=mongodb://mongo:27017.
+    *   Docker: compose already wires DB_BACKEND=mongo and MONGO\_URL=mongodb://mongo:27017.
         
 
 Restart the API after changing.
