@@ -1,6 +1,7 @@
 import mimetypes
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import Query, APIRouter, UploadFile, File, HTTPException
 from fastapi.responses import StreamingResponse
+
 from ..config import settings
 from ..adapters.repos.inmemory import InMemoryInviteRepo, InMemoryVideoRepo
 from ..adapters.repos.mongo import MongoInviteRepo, MongoVideoRepo
@@ -97,3 +98,31 @@ def debug_config():
             "videos": type(_vid_repo).__name__,
         },
     }
+
+def _video_out(v):
+    return {
+        "id": v.id,
+        "inviteId": v.invite_id,
+        "storageKey": v.storage_key,
+        "originalName": v.original_name,
+        "tag": v.tag,
+    }
+
+@router.get("/videos", response_model=list[VideoOut])
+def list_videos(inviteId: str = Query(..., description="Invite ID to list")):
+    vids = _vid_repo.list_by_invite(inviteId)
+    return [_video_out(v) for v in vids]
+
+@router.get("/videos/{video_id}", response_model=VideoOut)
+def get_video(video_id: str):
+    v = _vid_repo.get(video_id)
+    if not v:
+        raise HTTPException(404, detail="video not found")
+    return _video_out(v)
+
+@router.get("/invites/{invite_id}/videos/latest", response_model=VideoOut)
+def latest_video_for_invite(invite_id: str):
+    vids = _vid_repo.list_by_invite(invite_id)
+    if not vids:
+        raise HTTPException(404, detail="no video for invite")
+    return _video_out(vids[-1]) 
