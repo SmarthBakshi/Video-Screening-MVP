@@ -2,20 +2,20 @@
 
 
 dev:
-docker compose up --build
+	docker compose up -d --build
 
 
 down:
-docker compose down
+	docker compose down
 
 
 logs:
-docker compose logs -f
+	docker compose logs -f
 
 
 api:
-cd backend && uvicorn app.main:app --reload --port 8000
+	cd backend && uvicorn app.main:app --reload --port 8000
 
 
 web:
-cd frontend && npm run dev
+	cd frontend && npm run dev
