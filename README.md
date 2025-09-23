@@ -1,4 +1,4 @@
-aurio – Video Screening MVP
+Video Screening MVP
 ===========================
 
 A pragmatic, end-to-end MVP for async video screening:
